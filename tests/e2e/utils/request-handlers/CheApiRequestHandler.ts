@@ -8,7 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import axios, { AxiosRequestConfig, AxiosResponse } from 'axios';
+import axios, { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+/* import * as util from 'util'; */ // allows to print circular reference JSONObjects
 import { TYPES } from '../../configs/inversify.types';
 import { inject, injectable } from 'inversify';
 import { IAuthorizationHeaderHandler } from './headers/IAuthorizationHeaderHandler';
@@ -27,9 +28,10 @@ export class CheApiRequestHandler {
 	 */
 	static enableRequestInterceptor(): number {
 		Logger.debug();
-		return axios.interceptors.request.use((request: AxiosRequestConfig): AxiosRequestConfig => {
+		return axios.interceptors.request.use((request: InternalAxiosRequestConfig): InternalAxiosRequestConfig => {
 			try {
-				const REQUEST_CENSORED: AxiosRequestConfig = JSON.parse(JSON.stringify(request));
+				/* logger.warn(`before parse:\n${util.inspect(request)}`); */ // allows to print circular reference JSONObjects
+				const REQUEST_CENSORED: InternalAxiosRequestConfig = JSON.parse(JSON.stringify(request));
 				if (REQUEST_CENSORED === undefined) {
 					Logger.error('JSON.parse returned an undefined object, cannot process request');
 					return request;
@@ -38,7 +40,6 @@ export class CheApiRequestHandler {
 					Logger.warn('request does not contain any headers object');
 					return request;
 				}
-				REQUEST_CENSORED.headers.Authorization = 'CENSORED';
 				REQUEST_CENSORED.headers.Cookie = 'CENSORED';
 				Logger.info('request:\n' + JSON.stringify(REQUEST_CENSORED));
 			} catch (err) {
@@ -55,6 +56,7 @@ export class CheApiRequestHandler {
 		Logger.debug();
 		return axios.interceptors.response.use((response: AxiosResponse): AxiosResponse => {
 			try {
+				/* Logger.warn(`before parse:\n${util.inspect(response)}`); */ // allows to print circular reference JSONObjects
 				const RESPONSE_CENSORED: AxiosResponse = JSON.parse(
 					JSON.stringify(response, (key, value: string): string => {
 						switch (key) {
@@ -77,14 +79,7 @@ export class CheApiRequestHandler {
 					Logger.warn('response does not contain any config.headers object');
 					return response;
 				}
-				RESPONSE_CENSORED.config.headers.Authorization = 'CENSORED';
 				RESPONSE_CENSORED.config.headers.Cookie = 'CENSORED';
-				if (RESPONSE_CENSORED.data.access_token !== null) {
-					RESPONSE_CENSORED.data.access_token = 'CENSORED';
-				}
-				if (RESPONSE_CENSORED.data.refresh_token !== null) {
-					RESPONSE_CENSORED.data.refresh_token = 'CENSORED';
-				}
 				Logger.info('response:\n' + JSON.stringify(RESPONSE_CENSORED));
 			} catch (err) {
 				Logger.error('response: Failed to deep clone AxiosResponse:' + err);

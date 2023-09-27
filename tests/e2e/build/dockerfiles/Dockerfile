@@ -1,4 +1,4 @@
-FROM selenium/standalone-chrome:114.0
+FROM selenium/standalone-chrome:117.0
 
 ENV DISPLAY=':20'
 
@@ -6,9 +6,11 @@ USER root
 
 RUN apt-get update && apt-get install && \
     apt-get install -y ftp x11vnc ffmpeg libvpx6 && \
-    curl -fsSL https://deb.nodesource.com/setup_16.x | sudo -E bash - && \
-    apt-get install -y nodejs && \
-    npm install -g typescript && \
+    curl -fsSLo- https://raw.githubusercontent.com/nvm-sh/nvm/master/install.sh | bash && \
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm install stable && nvm alias default stable && nvm use default && nvm list && \
     node -v
 
 COPY --chown=0:0 build/dockerfiles/entrypoint.sh /tmp/
@@ -21,7 +23,11 @@ RUN sed -i "s/nodaemon=true/nodaemon=false/" /etc/supervisord.conf
 COPY package.json package-lock.json /tmp/e2e/
 
 RUN cd /tmp/e2e && \
-    npm i
+    export NVM_DIR="$HOME/.nvm" && \
+    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" && \
+    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" && \
+    nvm use default && \
+    npm ci
 
 COPY . /tmp/e2e
 

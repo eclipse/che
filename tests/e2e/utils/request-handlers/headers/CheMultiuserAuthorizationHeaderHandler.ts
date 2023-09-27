@@ -27,6 +27,7 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
 	) {}
 
 	async get(): Promise<AxiosRequestConfig> {
+		Logger.debug();
 		try {
 			const token: IWebDriverCookie = await this.driverHelper.getDriver().manage().getCookie(this.cookiesType);
 			if (this.authorizationToken !== token.value) {
@@ -35,7 +36,7 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
 		} catch (err) {
 			if (this.authorizationToken.length > 0) {
 				Logger.warn(
-					'could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.'
+					'Could not obtain _oauth_proxy cookie from chromedriver, browser session may have been killed. Using stored value.'
 				);
 			} else {
 				throw new Error(
@@ -46,7 +47,7 @@ export class CheMultiuserAuthorizationHeaderHandler implements IAuthorizationHea
 
 		return {
 			headers: {
-				cookie: `${this.cookiesType}=${this.authorizationToken}`
+				Cookie: `${this.cookiesType}=${this.authorizationToken}`
 			}
 		};
 	}

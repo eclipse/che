@@ -1,6 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 EXIT_CODE=0
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+nvm use default
 
 kill_ffmpeg(){
   echo "Killing ffmpeg with PID=$ffmpeg_pid"
