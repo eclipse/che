@@ -41,6 +41,8 @@ const samples: string[] = PLUGIN_TEST_CONSTANTS.TS_SAMPLE_LIST.split(',');
 
 for (const sample of samples) {
 	suite(`Check if recommended extensions installed for ${sample} ${BASE_TEST_CONSTANTS.TEST_ENVIRONMENT}`, function (): void {
+		this.bail(false);
+
 		const projectAndFileTests: ProjectAndFileTests = e2eContainer.get(CLASSES.ProjectAndFileTests);
 		const workspaceHandlingTests: WorkspaceHandlingTests = e2eContainer.get(CLASSES.WorkspaceHandlingTests);
 		const loginTests: LoginTests = e2eContainer.get(CLASSES.LoginTests);
