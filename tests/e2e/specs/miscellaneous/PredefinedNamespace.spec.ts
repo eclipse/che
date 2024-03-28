@@ -65,13 +65,13 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 	});
 
 	// verify that just created workspace is available for the dedicated user
-	test('Validate the created workspace is present in predefined namespace', function (): void {
+	test('Validate that predefined namespace has been created', function (): void {
 		const expectedProject: string = shellExecutor.executeArbitraryShellScript('oc get projects');
 		expect(expectedProject).contains(predefinedNamespaceName);
 	});
 
-	// make sure that the generated devspace has been created in the predefined namespace
-	test('Validate the created workspace is present in predefined namespace', function (): void {
+	// ensure the generated DevSpace is created within the predefined namespace
+	test('Create test DevWorkspace and verify its creation within the predefined namespace', function (): void {
 		kubernetesCommandLineToolsExecutor.namespace = predefinedNamespaceName;
 		kubernetesCommandLineToolsExecutor.workspaceName = workspaceName;
 		// relogin under the admin user (because regular user does not have permissions for getting pod states)
@@ -79,8 +79,8 @@ suite(`Create predefined workspace and check it ${BASE_TEST_CONSTANTS.TEST_ENVIR
 		expect(kubernetesCommandLineToolsExecutor.waitDevWorkspace().stdout).contains('condition met');
 	});
 
-	// verify that just created workspace with unique name is present in the predefined namespace
-	test('Validate the created workspace is present in predefined namespace', function (): void {
+	// verify that the newly created workspace, identified by a unique name, exists within the predefined namespace. Given that multiple users may use the same cluster and create multiple DevSpaces within the same OpenShift project, it's essential to confirm that our test project, distinguished by a unique name, has been successfully created.
+	test('Validate the creation of the correct DevWorkspace with a unique name', function (): void {
 		const ocDevWorkspaceOutput: string = kubernetesCommandLineToolsExecutor.getDevWorkspaceYamlConfiguration();
 		expect(ocDevWorkspaceOutput).includes(workspaceName);
 	});
