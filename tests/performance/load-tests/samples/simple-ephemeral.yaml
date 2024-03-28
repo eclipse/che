@@ -1,0 +1,13 @@
+kind: DevWorkspace
+apiVersion: workspace.devfile.io/v1alpha2
+metadata:
+  name: code-latest
+spec:
+  started: true
+  template:
+    attributes:
+      controller.devfile.io/storage-type: ephemeral
+    components:
+      - name: dev
+        container:
+          image: quay.io/devfile/universal-developer-image:latest
