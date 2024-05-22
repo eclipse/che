@@ -23,6 +23,9 @@ import { By, error } from 'selenium-webdriver';
 @injectable()
 export class WorkspaceHandlingTests {
 	private static WORKSPACE_NAME: By = By.xpath('//h1[contains(.,"Starting workspace ")]');
+	private static WORKSPACE_STATUS: By = By.xpath('//*/span[@class="pf-c-label__content"]/text()');
+	private static WORKSPACE_ALERT_TITLE: By = By.xpath('//*/h4[@class="pf-c-alert__title"]/text()');
+	private static WORKSPACE_ALERT_DESCRIPTION: By = By.xpath('//*/div[@class="pf-c-alert__description"]');
 	private static workspaceName: string = 'undefined';
 	private static parentGUID: string;
 
@@ -111,10 +114,9 @@ export class WorkspaceHandlingTests {
 			Logger.info(`obtained workspace name from workspace loader page: ${WorkspaceHandlingTests.workspaceName}`);
 			return;
 		}
-		Logger.error(`failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`);
-		throw new error.InvalidArgumentError(
-			`WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name:${WorkspaceHandlingTests.workspaceName}`
-		);
+		Logger.error('failed to obtain workspace name');
+		await this.logStartWorkspaceInfo();
+		throw new error.InvalidArgumentError('WorkspaceHandlingTests.obtainWorkspaceNameFromStartingPage failed to obtain workspace name.');
 	}
 
 	async stopWorkspace(workspaceName: string): Promise<void> {
@@ -130,5 +132,40 @@ export class WorkspaceHandlingTests {
 	async stopAndRemoveWorkspace(workspaceName: string): Promise<void> {
 		await this.dashboard.openDashboard();
 		await this.dashboard.stopAndRemoveWorkspaceByUI(workspaceName);
+	}
+
+	async getWorkspaceAlertDescription(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_DESCRIPTION).getText();
+		} catch (err) {
+			return '';
+		}
+	}
+
+	async getWorkspaceStatus(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_STATUS).getText();
+		} catch (err) {
+			return '';
+		}
+	}
+
+	async getWorkspaceAlertTitle(): Promise<string> {
+		try {
+			return await this.driverHelper.getDriver().findElement(WorkspaceHandlingTests.WORKSPACE_ALERT_TITLE).getText();
+		} catch (err) {
+			return '';
+		}
+	}
+
+	async logStartWorkspaceInfo(): Promise<void> {
+		const status: string = await this.getWorkspaceStatus();
+		const alertTitle: string = await this.getWorkspaceAlertTitle();
+		const alertDescription: string = await this.getWorkspaceAlertDescription();
+
+		Logger.info('Start workspace status: ' + status);
+		if (status === 'Failed') {
+			Logger.info('Start workspace details: ' + alertTitle + ' - ' + alertDescription);
+		}
 	}
 }
